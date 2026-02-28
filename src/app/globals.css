@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    /* MongoDB-inspired Green + Dark Theme */
+    --background: 220 20% 10%;
+    --foreground: 0 0% 100%;
+    --card: 220 15% 14%;
+    --card-foreground: 0 0% 100%;
+    --popover: 220 15% 14%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 142 69% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 13% 25%;
+    --muted-foreground: 220 10% 60%;
+    --accent: 142 69% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 25%;
+    --input: 220 13% 25%;
+    --ring: 142 69% 45%;
+    --chart-1: 142 69% 45%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Search highlight */
+.search-highlight {
+  background-color: rgba(34, 197, 94, 0.3);
+  padding: 0 2px;
+  border-radius: 2px;
+}
