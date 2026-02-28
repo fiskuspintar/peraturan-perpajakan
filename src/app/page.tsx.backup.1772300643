@@ -1,0 +1,53 @@
+import regulations from '@/data/regulations.json';
+import { Peraturan, FilterOptions } from '@/types';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Search, Filter, FileText, Calendar, Tag } from 'lucide-react';
+import Link from 'next/link';
+import Fuse from 'fuse.js';
+
+// Static data import - no fetch needed
+const allData = regulations as Peraturan[];
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-gradient-to-r from-[#1a2332] to-[#0d1117] border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Peraturan Perpajakan Indonesia</h1>
+          <p className="text-muted-foreground">Kumpulan peraturan perpajakan yang dapat dicari</p>
+          <p className="text-sm text-primary mt-2">Total: {allData.length} peraturan</p>
+        </div>
+      </header>
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid gap-4">
+          {allData.map((item) => (
+            <Link key={item.id} href={`/peraturan/${item.id}`}>
+              <Card className="p-6 hover:border-primary/50 transition-colors cursor-pointer">
+                <div className="flex gap-4">
+                  <div className="w-16 h-20 bg-gradient-to-b from-yellow-500/20 to-yellow-600/10 rounded flex items-center justify-center border border-yellow-500/30 flex-shrink-0">
+                    <span className="text-yellow-500 text-2xl">🦅</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-white mb-2">{item.judul}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{item.deskripsi}</p>
+                    <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30">
+                      {item.status || 'Berlaku'}
+                    </Badge>
+                    <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1"><Calendar className="h-4 w-4"/> {item.tanggalBerlaku}</span>
+                      <span className="flex items-center gap-1"><Tag className="h-4 w-4"/> {item.topik}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
