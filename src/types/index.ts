@@ -21,5 +21,5 @@ export interface FilterOptions {
 }
 
 export interface SearchResult extends Peraturan {
-  matches?: Fuse.FuseResultMatch[];
+  matches?: any[];
 }

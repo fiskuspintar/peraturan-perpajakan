@@ -14,14 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, X, ChevronDown, ChevronUp, FileText, Calendar, Tag } from "lucide-react";
+import { Search, Filter, X, ChevronDown, FileText, Calendar, Tag } from "lucide-react";
 import Fuse from "fuse.js";
 import { Peraturan, FilterOptions } from "@/types";
 
-// Mock data - will be replaced with actual data
-const mockData: Peraturan[] = [
+// Sample data from DDTC
+const sampleData: Peraturan[] = [
   {
-    id: "1",
+    id: "uu-2-2025",
     judul: "Undang-Undang Nomor: 2 Tahun 2025",
     deskripsi: "PERUBAHAN KEEMPAT ATAS UNDANG-UNDANG NOMOR 4 TAHUN 2009 TENTANG PERTAMBANGAN MINERAL DAN BATUBARA",
     jenis: "Undang-Undang (UU)",
@@ -30,10 +30,11 @@ const mockData: Peraturan[] = [
     bahasa: "Bahasa Indonesia",
     status: "Berlaku",
     tanggalBerlaku: "19 Mar 2025",
-    url: "#",
+    url: "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan/uu-2-2025",
+    contentFile: "regulation_uu-2-2025.md",
   },
   {
-    id: "2",
+    id: "uu-3-2020",
     judul: "Undang-Undang Nomor: 3 Tahun 2020",
     deskripsi: "PERUBAHAN ATAS UNDANG-UNDANG NOMOR 4 TAHUN 2009 TENTANG PERTAMBANGAN MINERAL DAN BATUBARA",
     jenis: "Undang-Undang (UU)",
@@ -45,7 +46,7 @@ const mockData: Peraturan[] = [
     url: "#",
   },
   {
-    id: "3",
+    id: "uu-15-2006",
     judul: "Undang-Undang Nomor: 15 Tahun 2006",
     deskripsi: "BADAN PEMERIKSA KEUANGAN",
     jenis: "Undang-Undang (UU)",
@@ -54,6 +55,42 @@ const mockData: Peraturan[] = [
     bahasa: "Bahasa Indonesia",
     status: "Berlaku",
     tanggalBerlaku: "30 Okt 2006",
+    url: "#",
+  },
+  {
+    id: "uu-15-2002",
+    judul: "Undang-Undang Nomor: 15 Tahun 2002",
+    deskripsi: "TINDAK PIDANA PENCUCIAN UANG",
+    jenis: "Undang-Undang (UU)",
+    kategori: "Peraturan Pusat",
+    topik: "PBB",
+    bahasa: "Bahasa Indonesia",
+    status: "Perubahan dan kondisi terakhir tidak berlaku karena diganti/dicabut",
+    tanggalBerlaku: "17 Apr 2002",
+    url: "#",
+  },
+  {
+    id: "uu-1-2000",
+    judul: "Undang-Undang Nomor: 1 Tahun 2000",
+    deskripsi: "PENGESAHAN ILO CONVENTION NOMOR 182 CONCERNING THE PROHIBITION AND IMMEDIATE ACTION FOR THE ELIMINATION OF THE WORST FORMS OF CHILD LABOUR",
+    jenis: "Undang-Undang (UU)",
+    kategori: "Peraturan Pusat",
+    topik: "PBB",
+    bahasa: "Bahasa Indonesia",
+    status: "Berlaku",
+    tanggalBerlaku: "08 Mar 2000",
+    url: "#",
+  },
+  {
+    id: "uu-42-1999",
+    judul: "Undang-Undang Nomor: 42 Tahun 1999",
+    deskripsi: "JAMINAN FIDUSIA",
+    jenis: "Undang-Undang (UU)",
+    kategori: "Peraturan Pusat",
+    topik: "PBB",
+    bahasa: "Bahasa Indonesia",
+    status: "Berlaku",
+    tanggalBerlaku: "30 Sep 1999",
     url: "#",
   },
 ];
@@ -88,7 +125,7 @@ export default function Home() {
   });
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [sortBy, setSortBy] = useState("terbaru");
-  const [data, setData] = useState<Peraturan[]>(mockData);
+  const [data, setData] = useState<Peraturan[]>(sampleData);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load data from JSON
@@ -100,12 +137,12 @@ export default function Home() {
           const jsonData = await response.json();
           setData(jsonData);
         } else {
-          // Fallback to mock data if file not found
-          setData(mockData);
+          // Fallback to sample data if file not found
+          setData(sampleData);
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        setData(mockData);
+        setData(sampleData);
       } finally {
         setIsLoading(false);
       }
