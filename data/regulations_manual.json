@@ -1,0 +1,97 @@
+{
+  "regulations": [
+    {
+      "id": "UU-2-2025",
+      "title": "Undang-Undang Nomor 2 Tahun 2025",
+      "subject": "Perubahan Keempat atas Undang-Undang Nomor 4 Tahun 2009 tentang Pertambangan Mineral dan Batubara",
+      "year": 2025,
+      "number": 2,
+      "type": "Undang-Undang",
+      "source": "DDTC",
+      "url": "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan-pusat/undang-undang-2-tahun-2025",
+      "file_path": "data/content/regulation_UU-2-2025.md",
+      "scraped_at": "2026-02-28",
+      "status": "completed"
+    },
+    {
+      "id": "UU-42-1999",
+      "title": "Undang-Undang Nomor 42 Tahun 1999",
+      "subject": "Jaminan Fidusia",
+      "year": 1999,
+      "number": 42,
+      "type": "Undang-Undang",
+      "source": "DDTC",
+      "url": "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan-pusat/undang-undang-42-tahun-1999",
+      "file_path": "data/content/regulation_UU-42-1999.md",
+      "scraped_at": "2026-02-28",
+      "status": "completed"
+    },
+    {
+      "id": "UU-24-1999",
+      "title": "Undang-Undang Nomor 24 Tahun 1999",
+      "subject": "Lalu Lintas Devisa dan Sistem Nilai Tukar",
+      "year": 1999,
+      "number": 24,
+      "type": "Undang-Undang",
+      "source": "DDTC",
+      "url": "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan-pusat/undang-undang-24-tahun-1999",
+      "file_path": "data/content/regulation_UU-24-1999.md",
+      "scraped_at": "2026-02-28",
+      "status": "completed"
+    },
+    {
+      "id": "UU-20-1999",
+      "title": "Undang-Undang Nomor 20 Tahun 1999",
+      "subject": "Pengesahan ILO Convention No. 138 concerning Minimum Age for Admission to Employment (Konvensi ILO mengenai Usia Minimum untuk Diperbolehkan Bekerja)",
+      "year": 1999,
+      "number": 20,
+      "type": "Undang-Undang",
+      "source": "DDTC",
+      "url": "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan-pusat/undang-undang-20-tahun-1999",
+      "file_path": "data/content/regulation_UU-20-1999.md",
+      "scraped_at": "2026-02-28",
+      "status": "completed"
+    },
+    {
+      "id": "UU-12-1994",
+      "title": "Undang-Undang Nomor 12 Tahun 1994",
+      "subject": "Perubahan atas Undang-Undang Nomor 12 Tahun 1985 tentang Pajak Bumi dan Bangunan",
+      "year": 1994,
+      "number": 12,
+      "type": "Undang-Undang",
+      "source": "DDTC",
+      "url": "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan-pusat/undang-undang-12-tahun-1994",
+      "file_path": "data/content/regulation_UU-12-1994.md",
+      "scraped_at": "2026-02-28",
+      "status": "completed"
+    },
+    {
+      "id": "UU-12-1985",
+      "title": "Undang-Undang Nomor 12 Tahun 1985",
+      "subject": "Pajak Bumi dan Bangunan",
+      "year": 1985,
+      "number": 12,
+      "type": "Undang-Undang",
+      "source": "DDTC",
+      "url": "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan-pusat/undang-undang-12-tahun-1985",
+      "file_path": "data/content/regulation_UU-12-1985.md",
+      "scraped_at": "2026-02-28",
+      "status": "completed"
+    },
+    {
+      "id": "UU-14-1947",
+      "title": "Undang-Undang Nomor 14 Tahun 1947",
+      "subject": "Pajak Pembangunan I",
+      "year": 1947,
+      "number": 14,
+      "type": "Undang-Undang",
+      "source": "DDTC",
+      "url": "https://perpajakan.ddtc.co.id/sumber-hukum/peraturan-pusat/undang-undang-14-tahun-1947",
+      "file_path": "data/content/regulation_UU-14-1947.md",
+      "scraped_at": "2026-02-28",
+      "status": "completed"
+    }
+  ],
+  "total_count": 7,
+  "last_updated": "2026-02-28"
+}

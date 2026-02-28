@@ -17,6 +17,7 @@ import {
 import { Search, Filter, X, ChevronDown, FileText, Calendar, Tag } from "lucide-react";
 import Fuse from "fuse.js";
 import { Peraturan, FilterOptions } from "@/types";
+import Link from "next/link";
 
 // Sample data from DDTC
 const sampleData: Peraturan[] = [
@@ -516,51 +517,52 @@ export default function Home() {
                 </div>
               ) : (
                 filteredData.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-card rounded-lg border border-border p-6 hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex gap-4">
-                      {/* Icon */}
-                      <div className="flex-shrink-0">
-                        <div className="w-16 h-20 bg-gradient-to-b from-yellow-500/20 to-yellow-600/10 rounded flex items-center justify-center border border-yellow-500/30">
-                          <div className="text-center">
-                            <div className="text-yellow-500 text-2xl">🦅</div>
+                  <Link key={item.id} href={`/peraturan/${item.id}`} className="block">
+                    <div
+                      className="bg-card rounded-lg border border-border p-6 hover:border-primary/50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex gap-4">
+                        {/* Icon */}
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-20 bg-gradient-to-b from-yellow-500/20 to-yellow-600/10 rounded flex items-center justify-center border border-yellow-500/30">
+                            <div className="text-center">
+                              <div className="text-yellow-500 text-2xl">🦅</div>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-white mb-2 hover:text-primary cursor-pointer">
-                          {item.judul}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                          {item.deskripsi}
-                        </p>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-semibold text-white mb-2 hover:text-primary">
+                            {item.judul}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {item.deskripsi}
+                          </p>
 
-                        {/* Status Badge */}
-                        <Badge 
-                          variant="outline" 
-                          className={`mb-3 ${getStatusColor(item.status)}`}
-                        >
-                          {item.status || "Berlaku"}
-                        </Badge>
+                          {/* Status Badge */}
+                          <Badge 
+                            variant="outline" 
+                            className={`mb-3 ${getStatusColor(item.status)}`}
+                          >
+                            {item.status || "Berlaku"}
+                          </Badge>
 
-                        {/* Metadata */}
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>Tanggal Berlaku: {item.tanggalBerlaku || "-"}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Tag className="h-4 w-4" />
-                            <span>Topik: {item.topik || "-"}</span>
+                          {/* Metadata */}
+                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>Tanggal Berlaku: {item.tanggalBerlaku || "-"}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Tag className="h-4 w-4" />
+                              <span>Topik: {item.topik || "-"}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
