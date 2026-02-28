@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "scrape": "node scripts/scraper.js",
-    "scrape:bg": "nohup node scripts/scraper.js > data/scrape.log 2>&1 &"
+    "scrape:puppeteer": "node scripts/scraper-puppeteer.js",
+    "scrape:bg": "nohup node scripts/scraper-puppeteer.js > data/scrape.log 2>&1 &"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -23,6 +24,7 @@
     "fuse.js": "^7.1.0",
     "lucide-react": "^0.575.0",
     "next": "14.2.35",
+    "puppeteer": "^24.37.5",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^3.5.0",

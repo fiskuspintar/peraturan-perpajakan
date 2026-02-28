@@ -35,71 +35,102 @@ async function ensureDirectories() {
   }
 }
 
+// Extract JSON data from Next.js script tags
+function extractNextData(html) {
+  const $ = cheerio.load(html);
+  let nextData = null;
+  
+  // Look for __NEXT_DATA__ script
+  $('script').each((i, el) => {
+    const content = $(el).html() || '';
+    if (content.includes('__NEXT_DATA__')) {
+      const match = content.match(/window\.__NEXT_DATA__\s*=\s*({.+?});?$/s);
+      if (match) {
+        try {
+          nextData = JSON.parse(match[1]);
+        } catch (e) {
+          console.log('Failed to parse __NEXT_DATA__');
+        }
+      }
+    }
+  });
+  
+  return nextData;
+}
+
 // Scrape list of regulations from search page
 async function scrapeRegulationList() {
   const regulations = [];
-  let page = 1;
-  let hasMore = true;
   
   console.log('Starting to scrape regulation list...');
+  console.log('URL:', `${SEARCH_URL}?jenis=70&topic=4&kategori=pusat&bahasa=id`);
   
-  while (hasMore && page <= 100) { // Safety limit
-    try {
-      const url = `${SEARCH_URL}?jenis=70&topic=4&kategori=pusat&bahasa=id&page=${page}`;
-      console.log(`Fetching page ${page}: ${url}`);
+  try {
+    const url = `${SEARCH_URL}?jenis=70&topic=4&kategori=pusat&bahasa=id`;
+    console.log(`Fetching: ${url}`);
+    
+    const response = await http.get(url);
+    const html = response.data;
+    
+    // Save HTML for debugging
+    await fs.writeFile(path.join(DATA_DIR, 'debug_page.html'), html, 'utf-8');
+    
+    const $ = cheerio.load(html);
+    
+    // Try to find regulation cards with various selectors
+    const selectors = [
+      'a[href*="/sumber-hukum/peraturan/"][href*="/id/"]',
+      'a[href*="/peraturan/"]',
+      '[class*="card"] a',
+      '.search-result a',
+      'article a'
+    ];
+    
+    for (const selector of selectors) {
+      const links = $(selector).filter((i, el) => {
+        const href = $(el).attr('href') || '';
+        return href.includes('/peraturan/') && !href.includes('/pencarian');
+      });
       
-      const response = await http.get(url);
-      const $ = cheerio.load(response.data);
+      console.log(`Selector "${selector}": ${links.length} links found`);
       
-      // Find regulation cards
-      const cards = $('.card, .regulation-card, [class*="card"], .search-result-item');
-      
-      if (cards.length === 0) {
-        // Try alternative selectors
-        const items = $('a[href*="/sumber-hukum/peraturan/"]').filter((i, el) => {
-          const href = $(el).attr('href') || '';
-          return href.includes('/peraturan/') && !href.includes('/pencarian');
-        });
+      links.each((i, el) => {
+        const $el = $(el);
+        const href = $el.attr('href') || '';
+        const fullUrl = href.startsWith('http') ? href : `${BASE_URL}${href}`;
         
-        if (items.length === 0) {
-          console.log(`No more items found on page ${page}`);
-          hasMore = false;
-          break;
+        // Extract ID from URL
+        const idMatch = href.match(/\/peraturan\/([a-zA-Z0-9-]+)/);
+        const id = idMatch ? idMatch[1] : `unknown-${Date.now()}-${i}`;
+        
+        // Try to find title in various places
+        let judul = '';
+        const titleSelectors = ['h3', 'h4', '.title', '[class*="title"]', 'span'];
+        for (const ts of titleSelectors) {
+          const titleEl = $el.find(ts).first();
+          if (titleEl.length && titleEl.text().trim()) {
+            judul = titleEl.text().trim();
+            break;
+          }
         }
         
-        items.each((i, el) => {
-          const $el = $(el);
-          const href = $el.attr('href') || '';
-          const fullUrl = href.startsWith('http') ? href : `${BASE_URL}${href}`;
-          
-          // Extract ID from URL
-          const idMatch = href.match(/\/peraturan\/(\d+)/);
-          const id = idMatch ? idMatch[1] : `unknown-${Date.now()}-${i}`;
-          
-          // Try to find title in parent or sibling elements
-          const titleEl = $el.find('h3, h4, .title, [class*="title"]').first();
-          const judul = titleEl.text().trim() || $el.text().trim();
-          
-          regulations.push({
-            id,
-            judul,
-            url: fullUrl,
-            scrapedAt: new Date().toISOString()
-          });
-        });
-      } else {
-        cards.each((i, el) => {
-          const $card = $(el);
-          const link = $card.find('a[href*="/peraturan/"]').first();
-          const href = link.attr('href') || '';
-          const fullUrl = href.startsWith('http') ? href : `${BASE_URL}${href}`;
-          
-          const idMatch = href.match(/\/peraturan\/(\d+)/);
-          const id = idMatch ? idMatch[1] : `unknown-${Date.now()}-${i}`;
-          
-          const judul = $card.find('h3, h4, .title').text().trim();
-          const deskripsi = $card.find('.description, p').text().trim();
-          
+        // If no title found in children, use the link text
+        if (!judul) {
+          judul = $el.text().trim();
+        }
+        
+        // Get description
+        let deskripsi = '';
+        const descSelectors = ['.description', 'p', '[class*="desc"]'];
+        for (const ds of descSelectors) {
+          const descEl = $el.closest('[class*="card"], [class*="item"]').find(ds).first();
+          if (descEl.length && descEl.text().trim()) {
+            deskripsi = descEl.text().trim();
+            break;
+          }
+        }
+        
+        if (judul && judul.length > 5) {
           regulations.push({
             id,
             judul,
@@ -107,22 +138,34 @@ async function scrapeRegulationList() {
             url: fullUrl,
             scrapedAt: new Date().toISOString()
           });
+        }
+      });
+      
+      if (regulations.length > 0) break;
+    }
+    
+    // Also try to extract from JSON embedded in script tags
+    const nextData = extractNextData(html);
+    if (nextData && nextData.props?.pageProps?.data) {
+      console.log('Found Next.js data');
+      const pageData = nextData.props.pageProps.data;
+      if (Array.isArray(pageData)) {
+        pageData.forEach((item, i) => {
+          if (item.judul || item.title || item.nama) {
+            regulations.push({
+              id: item.id || `data-${Date.now()}-${i}`,
+              judul: item.judul || item.title || item.nama,
+              deskripsi: item.deskripsi || item.description || '',
+              url: item.url || `${BASE_URL}/sumber-hukum/peraturan/${item.id}`,
+              scrapedAt: new Date().toISOString()
+            });
+          }
         });
       }
-      
-      // Check for next page
-      const nextPage = $(`a[href*="page=${page + 1}"], .pagination .next, [class*="next"]`);
-      if (nextPage.length === 0 || cards.length === 0) {
-        hasMore = false;
-      } else {
-        page++;
-        await delay(5000); // 5 second delay between pages
-      }
-      
-    } catch (error) {
-      console.error(`Error on page ${page}:`, error.message);
-      hasMore = false;
     }
+    
+  } catch (error) {
+    console.error('Error fetching regulation list:', error.message);
   }
   
   console.log(`Total regulations found: ${regulations.length}`);
@@ -132,84 +175,105 @@ async function scrapeRegulationList() {
 // Scrape detail page for a single regulation
 async function scrapeRegulationDetail(regulation) {
   try {
-    console.log(`Scraping detail: ${regulation.judul}`);
+    console.log(`\nScraping detail: ${regulation.judul || regulation.id}`);
+    console.log(`URL: ${regulation.url}`);
     
     const response = await http.get(regulation.url);
     const $ = cheerio.load(response.data);
     
-    // Extract metadata
+    // Extract metadata from various possible selectors
     const metadata = {};
     
-    // Try different selectors for metadata
-    $('.metadata-item, .detail-item, dl dt, .info-row').each((i, el) => {
-      const $el = $(el);
-      const label = $el.find('dt, .label, strong').text().trim().toLowerCase();
-      const value = $el.find('dd, .value, span').text().trim();
-      
-      if (label.includes('jenis')) metadata.jenis = value;
-      if (label.includes('kategori')) metadata.kategori = value;
-      if (label.includes('topik')) metadata.topik = value;
-      if (label.includes('bahasa')) metadata.bahasa = value;
-      if (label.includes('status')) metadata.status = value;
-      if (label.includes('tanggal') || label.includes('berlaku')) metadata.tanggalBerlaku = value;
-    });
+    // Try to find metadata in definition lists, tables, or specific classes
+    const metadataSelectors = [
+      '.metadata-item', '.detail-item', 'dl dt', '.info-row',
+      '[class*="meta"]', '[class*="detail"] dt', 'table tr'
+    ];
     
-    // Extract content
+    for (const selector of metadataSelectors) {
+      $(selector).each((i, el) => {
+        const $el = $(el);
+        let label = '';
+        let value = '';
+        
+        if (el.tagName === 'dt') {
+          label = $el.text().trim().toLowerCase();
+          value = $el.next('dd').text().trim();
+        } else if (el.tagName === 'tr') {
+          label = $el.find('td, th').first().text().trim().toLowerCase();
+          value = $el.find('td, th').eq(1).text().trim();
+        } else {
+          label = $el.find('.label, strong, [class*="label"]').text().trim().toLowerCase();
+          value = $el.find('.value, span, [class*="value"]').text().trim();
+        }
+        
+        if (label && value) {
+          if (label.includes('jenis')) metadata.jenis = value;
+          if (label.includes('kategori')) metadata.kategori = value;
+          if (label.includes('topik')) metadata.topik = value;
+          if (label.includes('bahasa')) metadata.bahasa = value;
+          if (label.includes('status')) metadata.status = value;
+          if (label.includes('tanggal') || label.includes('berlaku')) metadata.tanggalBerlaku = value;
+        }
+      });
+    }
+    
+    // Extract content from various possible content areas
     let content = '';
     const contentSelectors = [
-      '.document-content',
-      '.regulation-content', 
-      '.content-body',
-      'article',
-      '.detail-content',
-      '[class*="content"]'
+      '.document-content', '.regulation-content', '.content-body',
+      'article', '.detail-content', '[class*="content"]', 
+      '.main-content', '#content', '[role="main"]'
     ];
     
     for (const selector of contentSelectors) {
       const $content = $(selector).first();
       if ($content.length > 0) {
-        content = $content.text().trim();
-        if (content.length > 100) break;
+        const text = $content.text().trim();
+        if (text.length > 200) {
+          content = text;
+          break;
+        }
       }
     }
     
-    // If no content found, get all text from main area
+    // If still no content, get body text excluding scripts
     if (!content) {
-      content = $('main, .main-content, #content').text().trim();
+      $('script, style, nav, header, footer').remove();
+      content = $('body').text().trim();
     }
     
     // Clean up content
     content = content
       .replace(/\s+/g, ' ')
       .replace(/\n\s*\n/g, '\n')
+      .substring(0, 50000) // Limit content size
       .trim();
     
-    // Save content to file
+    // Save content to markdown file
     const contentFileName = `regulation_${regulation.id}.md`;
     const contentFilePath = path.join(CONTENT_DIR, contentFileName);
     
-    const contentData = {
-      ...regulation,
-      ...metadata,
-      content,
-      scrapedAt: new Date().toISOString()
-    };
+    const markdownContent = `# ${regulation.judul}\n\n` +
+      `## Metadata\n\n` +
+      `- **Jenis**: ${metadata.jenis || '-'}\n` +
+      `- **Kategori**: ${metadata.kategori || '-'}\n` +
+      `- **Topik**: ${metadata.topik || '-'}\n` +
+      `- **Bahasa**: ${metadata.bahasa || '-'}\n` +
+      `- **Status**: ${metadata.status || '-'}\n` +
+      `- **Tanggal Berlaku**: ${metadata.tanggalBerlaku || '-'}\n\n` +
+      `## URL\n${regulation.url}\n\n` +
+      `## Konten\n\n${content}`;
     
-    await fs.writeFile(
-      contentFilePath,
-      `# ${regulation.judul}\n\n## Metadata\n\n` +
-      Object.entries(metadata).map(([k, v]) => `- **${k}**: ${v}`).join('\n') +
-      `\n\n## URL\n${regulation.url}\n\n` +
-      `## Content\n\n${content}`,
-      'utf-8'
-    );
+    await fs.writeFile(contentFilePath, markdownContent, 'utf-8');
     
-    console.log(`✓ Saved content: ${contentFileName}`);
+    console.log(`✓ Saved content: ${contentFileName} (${content.length} chars)`);
     
     return {
       ...regulation,
       ...metadata,
-      contentFile: contentFileName
+      contentFile: contentFileName,
+      contentLength: content.length
     };
     
   } catch (error) {
@@ -226,6 +290,7 @@ async function main() {
   console.log('='.repeat(60));
   console.log('DDTC Tax Regulation Scraper');
   console.log('='.repeat(60));
+  console.log(`Start time: ${new Date().toISOString()}`);
   
   await ensureDirectories();
   
@@ -241,15 +306,22 @@ async function main() {
   );
   console.log(`✓ Saved list: ${regulations.length} regulations`);
   
+  if (regulations.length === 0) {
+    console.log('\n⚠ No regulations found. The website may require JavaScript rendering.');
+    console.log('Saved HTML to debug_page.html for inspection.');
+    return [];
+  }
+  
   // Step 2: Scrape details with 40 second delay
   console.log('\n--- Phase 2: Scraping Regulation Details ---');
   console.log(`Delay between requests: 40 seconds`);
+  console.log(`Estimated time: ${Math.ceil((regulations.length * 40) / 60)} minutes`);
   
   const detailedRegulations = [];
   
   for (let i = 0; i < regulations.length; i++) {
     const reg = regulations[i];
-    console.log(`\n[${i + 1}/${regulations.length}] Processing: ${reg.judul}`);
+    console.log(`\n[${i + 1}/${regulations.length}] Processing: ${reg.judul || reg.id}`);
     
     const detail = await scrapeRegulationDetail(reg);
     detailedRegulations.push(detail);
@@ -305,6 +377,7 @@ async function main() {
   console.log(`  - Total regulations: ${detailedRegulations.length}`);
   console.log(`  - Content files: ${detailedRegulations.filter(r => r.contentFile).length}`);
   console.log(`  - Errors: ${detailedRegulations.filter(r => r.error).length}`);
+  console.log(`End time: ${new Date().toISOString()}`);
   
   return detailedRegulations;
 }
