@@ -16,10 +16,7 @@ export default function Home() {
   
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return allData;
-    const fuse = new Fuse(allData, {
-      keys: ["judul", "deskripsi"],
-      threshold: 0.4,
-    });
+    const fuse = new Fuse(allData, { keys: ["judul", "deskripsi"], threshold: 0.4 });
     return fuse.search(searchQuery).map((r) => r.item);
   }, [searchQuery]);
 
@@ -30,22 +27,14 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-white mb-2">Peraturan Perpajakan Indonesia</h1>
           <p className="text-muted-foreground">Kumpulan peraturan perpajakan yang dapat dicari</p>
           <p className="text-sm text-primary mt-2">Total: {allData.length} peraturan</p>
-          
-          <div className="mt-6 relative">
+          <div className="mt6 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Cari peraturan..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 pr-4 py-6 text-lg bg-card border-border rounded-lg text-white"
-            />
+            <Input placeholder="Cari peraturan..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-12 pr-4 py-6 text-lg bg-card border-border rounded-lg text-white" />
           </div>
         </div>
       </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <p className="text-white mb-4">Menampilkan {filteredData.length} hasil</p>
-        
         <div className="space-y-4">
           {filteredData.map((item) => (
             <Link key={item.id} href={`/peraturan/${item.id}`}>
@@ -58,9 +47,7 @@ export default function Home() {
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-white mb-2">{item.judul}</h3>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{item.deskripsi}</p>
-                      <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30">
-                        {item.status || "Berlaku"}
-                      </Badge>
+                      <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30">{item.status || "Berlaku"}</Badge>
                       <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1"><Calendar className="h-4 w-4"/> {item.tanggalBerlaku || "-"}</span>
                         <span className="flex items-center gap-1"><Tag className="h-4 w-4"/> {item.topik || "-"}</span>

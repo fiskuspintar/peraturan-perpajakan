@@ -10,6 +10,7 @@ export interface Peraturan {
   tanggalBerlaku: string;
   url: string;
   contentFile?: string;
+  fullContent?: string; // Tambahan untuk konten lengkap
 }
 
 export interface FilterOptions {
@@ -18,8 +19,4 @@ export interface FilterOptions {
   jenisPeraturan: string[];
   topik: string[];
   tahun: string[];
-}
-
-export interface SearchResult extends Peraturan {
-  matches?: any[];
 }
