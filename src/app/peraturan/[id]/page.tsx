@@ -6,8 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { Calendar, Tag, ExternalLink, ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { promises as fs } from "fs";
-import path from "path";
 
 export function generateStaticParams() {
   return regulations.map((item) => ({
@@ -22,27 +20,15 @@ export function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-async function getRegulationContent(id: string): Promise<string | null> {
-  try {
-    const filePath = path.join(process.cwd(), "data", "content", `regulation_${id}.md`);
-    const content = await fs.readFile(filePath, "utf-8");
-    
-    // Extract content after "## Konten"
-    const match = content.match(/## Konten\s*\n([\s\S]*)/);
-    return match ? match[1].trim() : content;
-  } catch {
-    return null;
-  }
-}
-
-export default async function DetailPage({ params }: { params: { id: string } }) {
+export default function DetailPage({ params }: { params: { id: string } }) {
   const data = regulations.find((r) => r.id === params.id);
   
   if (!data) {
     notFound();
   }
 
-  const content = await getRegulationContent(params.id);
+  // Konten sudah ada di data.fullContent
+  const content = data.fullContent || data.deskripsi;
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,9 +70,11 @@ export default async function DetailPage({ params }: { params: { id: string } })
                 </Badge>
                 <Separator className="my-4" />
                 
+                <h3 className="text-lg font-semibold text-white mb-4">Isi Peraturan</h3>
+                
                 {content ? (
                   <div className="prose prose-invert max-w-none">
-                    <pre className="whitespace-pre-wrap font-mono text-sm text-foreground bg-muted p-4 rounded-lg overflow-x-auto">
+                    <pre className="whitespace-pre-wrap font-mono text-sm text-foreground bg-muted p-4 rounded-lg overflow-x-auto max-h-[600px] overflow-y-auto">
                       {content}
                     </pre>
                   </div>
@@ -94,7 +82,6 @@ export default async function DetailPage({ params }: { params: { id: string } })
                   <div className="text-center py-8 text-muted-foreground">
                     <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Konten lengkap belum tersedia.</p>
-                    <p className="text-sm mt-2">Silakan kunjungi sumber asli.</p>
                   </div>
                 )}
               </CardContent>
@@ -137,7 +124,7 @@ export default async function DetailPage({ params }: { params: { id: string } })
                 <a href={data.url} target="_blank" rel="noopener noreferrer" className="block">
                   <Button className="w-full" variant="outline">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    Lihat di Sumber
+                    Unduh PDF Asli
                   </Button>
                 </a>
               </CardContent>
